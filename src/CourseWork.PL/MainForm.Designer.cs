@@ -1,4 +1,4 @@
-﻿namespace OPR_CourseWork
+﻿namespace CourseWork.PL
 {
     partial class MainForm
     {
@@ -28,10 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.buttonReadMatrix = new System.Windows.Forms.Button();
             this.richTextBox = new System.Windows.Forms.RichTextBox();
-            this.richTextBoxInfo = new System.Windows.Forms.RichTextBox();
+            this.labelInfo = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // openFileDialog
@@ -50,21 +51,22 @@
             // 
             // richTextBox
             // 
-            this.richTextBox.Location = new System.Drawing.Point(14, 324);
+            this.richTextBox.Enabled = false;
+            this.richTextBox.Location = new System.Drawing.Point(14, 201);
             this.richTextBox.Name = "richTextBox";
             this.richTextBox.ReadOnly = true;
-            this.richTextBox.Size = new System.Drawing.Size(687, 226);
+            this.richTextBox.Size = new System.Drawing.Size(687, 349);
             this.richTextBox.TabIndex = 1;
             this.richTextBox.Text = "";
             // 
-            // richTextBoxInfo
+            // labelInfo
             // 
-            this.richTextBoxInfo.Location = new System.Drawing.Point(14, 12);
-            this.richTextBoxInfo.Name = "richTextBoxInfo";
-            this.richTextBoxInfo.ReadOnly = true;
-            this.richTextBoxInfo.Size = new System.Drawing.Size(687, 306);
-            this.richTextBoxInfo.TabIndex = 2;
-            this.richTextBoxInfo.Text = "";
+            this.labelInfo.AutoSize = true;
+            this.labelInfo.Location = new System.Drawing.Point(14, 9);
+            this.labelInfo.Name = "labelInfo";
+            this.labelInfo.Size = new System.Drawing.Size(682, 189);
+            this.labelInfo.TabIndex = 2;
+            this.labelInfo.Text = resources.GetString("labelInfo.Text");
             // 
             // MainForm
             // 
@@ -72,15 +74,17 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.ClientSize = new System.Drawing.Size(715, 610);
-            this.Controls.Add(this.richTextBoxInfo);
+            this.Controls.Add(this.labelInfo);
             this.Controls.Add(this.richTextBox);
             this.Controls.Add(this.buttonReadMatrix);
             this.Font = new System.Drawing.Font("Times New Roman", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Margin = new System.Windows.Forms.Padding(5);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Решение задачи коммивояжера методов ветвей и границ";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -89,6 +93,6 @@
         private OpenFileDialog openFileDialog;
         private Button buttonReadMatrix;
         private RichTextBox richTextBox;
-        private RichTextBox richTextBoxInfo;
+        private Label labelInfo;
     }
 }

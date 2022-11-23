@@ -1,30 +1,41 @@
-﻿using System.Diagnostics;
+﻿using CourseWork.BLL.Interfaces;
+using CourseWork.DAL.Interfaces;
+using CourseWork.Models;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 
-namespace Lab7
+namespace CourseWork.BLL.Services
 {
-    public class BranchesAndBoundariesSolver
+    public class BranchesAndBoundariesSolver : ISolver
     {
-        private static List<List<double?>> _startNumbers;
-
-        public BranchesAndBoundariesSolver(List<List<double?>> startNumbers)
+        private readonly ISerializer _serializer;
+        public BranchesAndBoundariesSolver(ISerializer serializer)
         {
-            _startNumbers = startNumbers;
+            _serializer = serializer;
         }
 
         public List<Matrix> MatrixList { get; set; } = new List<Matrix>();
 
         public List<List<int>> BranchingCoords { get; set; } = new List<List<int>>();
 
-        public double ContourLength { get; set; }
+        public float ContourLength { get; set; }
 
-        //public List<int> BranchingCoordsToRemove { get; set; } = new List<int>();
-
-        public bool Solve(List<List<double?>> startNumbers, double lowerBorder = 0, Matrix previousMatrix = null)
+        public bool Solve(List<List<float?>> startNumbers = null, float lowerBorder = 0, Matrix previousMatrix = null, string fileName = null)
         {
-            var matrix = new Matrix(startNumbers);
+            Matrix matrix;
+            if (fileName is not null)
+            {
+                matrix = _serializer.DeserializeCsvMatrix(fileName);
+            }
+            else
+            {
+                matrix = new Matrix(startNumbers);
+            }
+
+            var startNumbersClone = DeepCloneListOfLists(matrix.Numbers);
+            
             MatrixList.Add(matrix);
-            //Debug.WriteLine($"Исходная матрица:\n {matrix}\n______________________________________________________");
             matrix.SubstractMinInRows();
             if (MatrixList.Count == 1)
             {
@@ -35,7 +46,7 @@ namespace Lab7
                 matrix.CastConst = lowerBorder;
                 matrix.PreviousMatrix = previousMatrix;
             }
-            
+
             matrix.SubstractMinInColumns();
             matrix.InitializeBranchingCoords();
             BranchingCoords.Add(matrix.BranchingCoords);
@@ -60,11 +71,9 @@ namespace Lab7
             while (!matrix.CheckFor2x2())
             {
                 var previousMatrixLowerBorder = matrix.LowerBorder;
-                //Debug.WriteLine($"Новая матрица:\n {matrix}\n______________________________________________________");
                 AddRestrictions(matrix);
                 matrix.SubstractMinInRows();
                 matrix.SubstractMinInColumns();
-                //Debug.WriteLine($"Матрица после приведения:\n {matrix}\n______________________________________________________");
                 matrix.InitializeBranchingCoords();
                 BranchingCoords.Add(matrix.BranchingCoords);
                 matrixWithoutArc = matrix.GetMatrixWithoutArc();
@@ -73,11 +82,7 @@ namespace Lab7
                 MatrixList.Add(matrixWithoutArc);
                 MatrixList.Add(matrixWithArc);
                 matrixWithArc.InitializetH();
-                //Debug.WriteLine($"Матрица с дугой:\n {matrixWithArc}");
-                //Debug.WriteLine($"Border = {matrixWithArc.LowerBorder}\n______________________________________________________");
                 matrixWithoutArc.InitializetH();
-                //Debug.WriteLine($"Матрица без дуги:\n {matrixWithoutArc}");
-                //Debug.WriteLine($"Border = {matrixWithoutArc.LowerBorder}\n______________________________________________________");
                 var minLowerBorder = MatrixList.Where(m => m.WasUsed is false).Min(m => m.LowerBorder);
                 if (matrixWithArc.LowerBorder <= matrixWithoutArc.LowerBorder)
                 {
@@ -89,12 +94,6 @@ namespace Lab7
                     matrix = new Matrix(matrixWithoutArc.Numbers, matrixWithoutArc.LowerBorder, matrix);
                     matrixWithoutArc.WasUsed = true;
                 }
-                //if (previousMatrixLowerBorder < matrix.LowerBorder)
-                //{
-                //    BranchingCoordsToRemove.Add(BranchingCoords.Last()[0]);
-                //    BranchingCoordsToRemove.Add(BranchingCoords.Last()[1]);
-                //    return false;
-                //}
             }
 
             AddRestrictions(matrix);
@@ -109,27 +108,10 @@ namespace Lab7
                 }
             }
 
-            //if (BranchingCoordsToRemove.Count > 0)
-            //{
-            //    for (int i = 0; i < BranchingCoords.Count; i++)
-            //    {
-            //        if (BranchingCoords[i][0] == BranchingCoordsToRemove[0] && BranchingCoords[i][1] == BranchingCoordsToRemove[1])
-            //        {
-            //            BranchingCoords.RemoveAt(i);
-            //        }
-            //    }
-
-            //    BranchingCoordsToRemove.Clear();
-            //}
-
             ContourLength = 0;
             for (int i = 0; i < BranchingCoords.Count; i++)
             {
-                var number = _startNumbers[BranchingCoords[i][0]][BranchingCoords[i][1]];
-                if (number is not null)
-                {
-                    ContourLength += (double)number;
-                }
+                ContourLength += (float)startNumbersClone[BranchingCoords[i][0]][BranchingCoords[i][1]];
             }
 
             if (ContourLength >= matrix.LowerBorder)
@@ -144,6 +126,7 @@ namespace Lab7
         {
             var resultSb = new StringBuilder();
             int currentPoint = 0;
+            BranchingCoords = BranchingCoords.OrderBy(bc => bc[0]).ToList();
             for (int i = 0; i < BranchingCoords.Count; i++)
             {
                 if (BranchingCoords[i][0] == currentPoint)
@@ -154,8 +137,7 @@ namespace Lab7
                 }
             }
 
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+            int cycleCount = 0;
             while (currentPoint != 0)
             {
                 for (int i = 0; i < BranchingCoords.Count; i++)
@@ -166,14 +148,22 @@ namespace Lab7
                         resultSb.Append($" → {currentPoint + 1}");
                     }
                 }
-                
-                if (stopwatch.ElapsedMilliseconds > 10000)
+
+                cycleCount++;
+                if (cycleCount > Math.Pow(BranchingCoords.Count, 2) + 1)
                 {
-                    throw new TimeoutException("Задача не решаема!");
+                    throw new InvalidOperationException("Задача не решаема!");
                 }
             }
 
             return resultSb.ToString();
+        }
+
+        public void Clear()
+        {
+            MatrixList = new List<Matrix>();
+            BranchingCoords = new List<List<int>>();
+            ContourLength = 0;
         }
 
         private static void AddRestrictions(Matrix matrix)
@@ -189,7 +179,7 @@ namespace Lab7
                     {
                         if (!column.All(x => x is null))
                         {
-                            if (!row.Contains(double.PositiveInfinity) && !column.Contains(double.PositiveInfinity))
+                            if (!row.Contains(float.PositiveInfinity) && !column.Contains(float.PositiveInfinity))
                             {
                                 pairs.Add(i);
                                 pairs.Add(j);
@@ -201,21 +191,25 @@ namespace Lab7
             }
             for (int i = 0; i < pairs.Count; i += 2)
             {
-                matrix.Numbers[pairs[i]][pairs[i + 1]] = double.PositiveInfinity;
+                matrix.Numbers[pairs[i]][pairs[i + 1]] = float.PositiveInfinity;
             }
         }
 
-        public override string ToString()
+        private static List<List<float?>> DeepCloneListOfLists(List<List<float?>> oldList)
         {
-            var sb = new StringBuilder();
-            for (int i = 0; i < MatrixList.Count; i++)
+            var newList = new List<List<float?>>();
+            for (int i = 0; i < oldList.Count; i++)
             {
-                sb.AppendLine(MatrixList[i].ToString());
-                sb.AppendLine(MatrixList[i].WasUsed.ToString());
-                sb.AppendLine("_____________________________");
+                var row = new List<float?>();
+                for (int j = 0; j < oldList[i].Count; j++)
+                {
+                    row.Add(oldList[i][j]);
+                }
+
+                newList.Add(row);
             }
 
-            return sb.ToString();
+            return newList;
         }
     }
 }

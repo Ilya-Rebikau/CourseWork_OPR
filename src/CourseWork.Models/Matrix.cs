@@ -1,17 +1,17 @@
 ﻿using System.Text;
 
-namespace Lab7
+namespace CourseWork.Models
 {
     public class Matrix
     {
-        public Matrix(List<List<double?>> numbers)
+        public Matrix(List<List<float?>> numbers)
         {
             StartNumbers = CopyNumbers(numbers);
             Numbers = CopyNumbers(numbers);
             GetColumns();
         }
 
-        public Matrix(List<List<double?>> numbers, double lowerBorder, Matrix previousMatrix)
+        public Matrix(List<List<float?>> numbers, float lowerBorder, Matrix previousMatrix)
         {
             CastConst = lowerBorder;
             StartNumbers = CopyNumbers(numbers);
@@ -24,19 +24,19 @@ namespace Lab7
 
         public bool WasUsed = false;
 
-        public double LowerBorder => CastConst + H;
+        public float LowerBorder => CastConst + H;
 
-        public List<List<double?>> StartNumbers { get; }
+        public List<List<float?>> StartNumbers { get; }
 
-        public double CastConst { get; set; }
+        public float CastConst { get; set; }
 
-        public List<List<double?>> Numbers { get; set; }
+        public List<List<float?>> Numbers { get; set; }
 
-        public List<List<double?>> Columns { get; set; }
+        public List<List<float?>> Columns { get; set; }
 
         public List<int> BranchingCoords { get; set; }
 
-        public double H { get; set; }
+        public float H { get; set; }
 
         public bool CheckFor2x2()
         {
@@ -70,7 +70,7 @@ namespace Lab7
                     var min = row.Where(n => n is not null).Min();
                     if (min is not null)
                     {
-                        H += (double)min;
+                        H += (float)min;
                     }
                 }
             }
@@ -83,7 +83,7 @@ namespace Lab7
                     var min = column.Where(n => n is not null).Min();
                     if (min is not null)
                     {
-                        H += (double)min;
+                        H += (float)min;
                     }
                 }
             }
@@ -94,7 +94,7 @@ namespace Lab7
             var newNumbers = CopyNumbers(Numbers);
             if (newNumbers[BranchingCoords[0]][BranchingCoords[1]] is not null)
             {
-                newNumbers[BranchingCoords[0]][BranchingCoords[1]] = double.PositiveInfinity;
+                newNumbers[BranchingCoords[0]][BranchingCoords[1]] = float.PositiveInfinity;
             }
 
             return new Matrix(newNumbers, LowerBorder, this);
@@ -116,7 +116,7 @@ namespace Lab7
 
             if (newNumbers[BranchingCoords[1]][BranchingCoords[0]] is not null)
             {
-                newNumbers[BranchingCoords[1]][BranchingCoords[0]] = double.PositiveInfinity;
+                newNumbers[BranchingCoords[1]][BranchingCoords[0]] = float.PositiveInfinity;
             }
 
             return new Matrix(newNumbers, LowerBorder, this);
@@ -124,7 +124,7 @@ namespace Lab7
 
         public void InitializeBranchingCoords()
         {
-            var zeroDegrees = new Dictionary<List<int>, double?>();
+            var zeroDegrees = new Dictionary<List<int>, float?>();
             for (int i = 0; i < Numbers.Count; i++)
             {
                 for (int j = 0; j < Numbers[i].Count; j++)
@@ -197,27 +197,27 @@ namespace Lab7
 
         public void InitializeCastConst()
         {
-            var rowsMins = new List<double?>();
+            var rowsMins = new List<float?>();
             foreach (var row in StartNumbers)
             {
                 rowsMins.Add(row.Min());
             }
 
-            var columnsMins = new List<double?>();
+            var columnsMins = new List<float?>();
             foreach (var column in Columns)
             {
                 columnsMins.Add(column.Min());
             }
 
-            CastConst = (double)(rowsMins.Sum() + columnsMins.Sum());
+            CastConst = (float)(rowsMins.Sum() + columnsMins.Sum());
         }
 
         private void GetColumns()
         {
-            Columns = new List<List<double?>>();
+            Columns = new List<List<float?>>();
             for (int i = 0; i < Numbers.Count; i++)
             {
-                var column = new List<double?>();
+                var column = new List<float?>();
                 for (int j = 0; j < Numbers[i].Count; j++)
                 {
                     column.Add(Numbers[j][i]);
@@ -229,10 +229,10 @@ namespace Lab7
 
         private void GetNumbers()
         {
-            Numbers = new List<List<double?>>();
+            Numbers = new List<List<float?>>();
             for (int i = 0; i < Columns.Count; i++)
             {
-                var row = new List<double?>();
+                var row = new List<float?>();
                 for (int j = 0; j < Columns[i].Count; j++)
                 {
                     row.Add(Columns[j][i]);
@@ -242,12 +242,12 @@ namespace Lab7
             }
         }
 
-        private static List<List<double?>> CopyNumbers(List<List<double?>> numbers)
+        private static List<List<float?>> CopyNumbers(List<List<float?>> numbers)
         {
-            var copiedNumbers = new List<List<double?>>();
+            var copiedNumbers = new List<List<float?>>();
             for (int i = 0; i < numbers.Count; i++)
             {
-                var row = new List<double?>();
+                var row = new List<float?>();
                 for (int j = 0; j < numbers[i].Count; j++)
                 {
                     row.Add(numbers[i][j]);
