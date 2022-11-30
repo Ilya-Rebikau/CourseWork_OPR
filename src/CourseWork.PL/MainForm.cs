@@ -23,10 +23,10 @@ namespace CourseWork.PL
             while (!solveResult)
             {
                 var matrixes = _solver.MatrixList.Where(m => m.WasUsed is false).OrderBy(m => m.LowerBorder).ToList();
-                _startNumbers = matrixes[0].Numbers;
-                matrixes[0].WasUsed = true;
-                _solver.BranchingCoords.Clear();
                 var currentMatrix = matrixes[0];
+                _startNumbers = currentMatrix.Numbers;
+                currentMatrix.WasUsed = true;
+                _solver.BranchingCoords.Clear();
                 while (currentMatrix.PreviousMatrix is not null)
                 {
                     previousMatrix = currentMatrix.PreviousMatrix;
@@ -35,8 +35,8 @@ namespace CourseWork.PL
                 }
 
                 _solver.BranchingCoords.Reverse();
-                lowerBorder = matrixes[0].LowerBorder;
-                previousMatrix = matrixes[0].PreviousMatrix;
+                lowerBorder = currentMatrix.LowerBorder;
+                previousMatrix = currentMatrix.PreviousMatrix;
                 solveResult = _solver.Solve(_startNumbers, lowerBorder, previousMatrix.PreviousMatrix, null);
             }
 
