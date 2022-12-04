@@ -21,7 +21,16 @@ namespace CourseWork.PL
 
             Application.Run(ServiceProvider.GetRequiredService<MainForm>());
         }
+
+        /// <summary>
+        /// IServiceProvider.
+        /// </summary>
         public static IServiceProvider ServiceProvider { get; private set; }
+
+        /// <summary>
+        /// Добавляет DI контейнер в программу.
+        /// </summary>
+        /// <returns></returns>
         static IHostBuilder CreateHostBuilder()
         {
             return Host.CreateDefaultBuilder()

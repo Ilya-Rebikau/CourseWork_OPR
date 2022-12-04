@@ -3,10 +3,25 @@ using CourseWork.Models;
 
 namespace CourseWork.PL
 {
+    /// <summary>
+    /// Класс главной формы интерфейса.
+    /// </summary>
     public partial class MainForm : Form
     {
+        /// <summary>
+        /// Лист начальных чисел матрицы.
+        /// </summary>
         private List<List<float?>> _startNumbers;
+
+        /// <summary>
+        /// Объект решателя.
+        /// </summary>
         private readonly ISolver _solver;
+
+        /// <summary>
+        /// Инициализирует новый объект класса <see cref="MainForm"/>.
+        /// </summary>
+        /// <param name="solver">Решатель.</param>
         public MainForm(ISolver solver)
         {
             InitializeComponent();
@@ -15,11 +30,17 @@ namespace CourseWork.PL
             buttonReadMatrix.Click += ButtonReadMatrixAndCalculate_Click;
         }
 
+        /// <summary>
+        /// Находит контур и его длину методом ветвей и границ.
+        /// </summary>
+        /// <param name="fileName">Путь к файлу с матрицей.</param>
         private void Calculate(string fileName)
         {
             float lowerBorder = 0;
             Matrix previousMatrix = null;
             bool solveResult = _solver.Solve(_startNumbers, lowerBorder, previousMatrix, fileName);
+            // Если задача не решилась, то в бесконечном цикле перебираем все матрицы, которые всё ещё не использовались
+            // в методе ветвей и границ, пока одна из них не окажется подходящей.
             while (!solveResult)
             {
                 var matrixes = _solver.MatrixList.Where(m => m.WasUsed is false).OrderBy(m => m.LowerBorder).ToList();
@@ -45,6 +66,11 @@ namespace CourseWork.PL
             richTextBox.AppendText("Задача решена!\n");
         }
 
+        /// <summary>
+        /// Метод вызывается при нажатии на кнопку решить задачу.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">Событие нажатия кнопки.</param>
         private void ButtonReadMatrixAndCalculate_Click(object sender, EventArgs e)
         {
             try

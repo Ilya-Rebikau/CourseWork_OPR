@@ -1,32 +1,45 @@
 ﻿using CourseWork.BLL.Interfaces;
 using CourseWork.DAL.Interfaces;
 using CourseWork.Models;
-using System.Diagnostics;
-using System.IO;
 using System.Text;
 
 namespace CourseWork.BLL.Services
 {
+    /// <summary>
+    /// Решатель для нахождения контура и его длины методом ветвей и границ.
+    /// </summary>
     public class BranchesAndBoundariesSolver : ISolver
     {
+        /// <summary>
+        /// Объект ISerializer для десериализации матрицы.
+        /// </summary>
         private readonly ISerializer _serializer;
+
+        /// <summary>
+        /// Инициализирует новый объект класса <see cref="BranchesAndBoundariesSolver"/>.
+        /// </summary>
+        /// <param name="serializer">Объект ISerializer для десериализации матрицы.</param>
         public BranchesAndBoundariesSolver(ISerializer serializer)
         {
             _serializer = serializer;
         }
 
+        /// <inheritdoc/>
         public List<Matrix> MatrixList { get; set; } = new List<Matrix>();
 
+        /// <inheritdoc/>
         public List<List<int>> BranchingCoords { get; set; } = new List<List<int>>();
 
+        /// <inheritdoc/>
         public float ContourLength { get; set; }
 
+        /// <inheritdoc/>
         public bool Solve(List<List<float?>> startNumbers = null, float lowerBorder = 0, Matrix previousMatrix = null, string fileName = null)
         {
             Matrix matrix;
             if (fileName is not null)
             {
-                matrix = _serializer.DeserializeCsvMatrix(fileName);
+                matrix = _serializer.DeserializeMatrix(fileName);
             }
             else
             {
@@ -122,6 +135,7 @@ namespace CourseWork.BLL.Services
             return false;
         }
 
+        /// <inheritdoc/>
         public string GetCountourString()
         {
             var resultSb = new StringBuilder();
@@ -159,6 +173,7 @@ namespace CourseWork.BLL.Services
             return resultSb.ToString();
         }
 
+        /// <inheritdoc/>
         public void Clear()
         {
             MatrixList = new List<Matrix>();
@@ -166,6 +181,11 @@ namespace CourseWork.BLL.Services
             ContourLength = 0;
         }
 
+        /// <summary>
+        /// Добавляет ограничения на матрицу если в строке и столбце нет ни одной бесконечности,
+        /// то на их пересечении ставит бесконечность.
+        /// </summary>
+        /// <param name="matrix">Матрица.</param>
         private static void AddRestrictions(Matrix matrix)
         {
             var pairs = new List<int>();
@@ -195,6 +215,11 @@ namespace CourseWork.BLL.Services
             }
         }
 
+        /// <summary>
+        /// Глубокое копирование листа.
+        /// </summary>
+        /// <param name="oldList">Старый лист.</param>
+        /// <returns>Новый скопированный лист.</returns>
         private static List<List<float?>> DeepCloneListOfLists(List<List<float?>> oldList)
         {
             var newList = new List<List<float?>>();

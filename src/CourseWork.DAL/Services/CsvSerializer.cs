@@ -3,9 +3,13 @@ using CourseWork.Models;
 
 namespace CourseWork.DAL.Services
 {
+    /// <summary>
+    /// Класс для сериализации и десериализации из файла формата csv.
+    /// </summary>
     internal class CsvSerializer : ISerializer
     {
-        public Matrix DeserializeCsvMatrix(string fileNameWithPath)
+        /// <inheritdoc/>
+        public Matrix DeserializeMatrix(string fileNameWithPath)
         {
             var elements = new List<List<float?>>();
             var lines = File.ReadAllLines(fileNameWithPath);
